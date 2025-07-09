@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,8 +25,10 @@ import java.util.List;
 @Component
 public class JWTAutenticationFilter extends OncePerRequestFilter {
 
+    @Autowired
     private JwtService jwtService;
 
+    @Autowired
     @Qualifier("customUserDetailsService")
     private UserDetailsService userDetailsService;
 
@@ -64,6 +67,7 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
             if (token == null) {
                 throw new JwtAuthenticationException("Token no proporcionado.");
             }
+
             String email = jwtService.extractUsername(token);
 
             if (email == null || !jwtService.isTokenValid(token, userDetailsService.loadUserByUsername(email))) {
@@ -77,7 +81,6 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
-
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
