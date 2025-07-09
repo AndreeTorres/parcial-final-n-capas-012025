@@ -47,11 +47,3 @@ SPRING_DATASOURCE_PASSWORD=admin1234
 El archivo `application.yml` está configurado para leer estas variables de entorno.
 
 ---
-
-## Notas finales
-
-- Asegurate de que ningún otro proceso esté usando los puertos `8080` o `5432`.
-- Los datos de PostgreSQL se almacenan en un volumen llamado `pgdata`.
-- Si necesitás reiniciar con base de datos limpia: `docker-compose down -v`.
-
----
