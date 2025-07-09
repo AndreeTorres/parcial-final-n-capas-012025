@@ -5,12 +5,11 @@ import com.uca.parcialfinalncapas.dto.request.TicketUpdateRequest;
 import com.uca.parcialfinalncapas.dto.response.TicketResponse;
 import com.uca.parcialfinalncapas.dto.response.TicketResponseList;
 import com.uca.parcialfinalncapas.entities.Ticket;
-import com.uca.parcialfinalncapas.entities.User;
 import com.uca.parcialfinalncapas.exceptions.BadTicketRequestException;
 import com.uca.parcialfinalncapas.exceptions.TicketNotFoundException;
 import com.uca.parcialfinalncapas.exceptions.UserNotFoundException;
 import com.uca.parcialfinalncapas.repository.TicketRepository;
-import com.uca.parcialfinalncapas.repository.UserRepository;
+import com.uca.parcialfinalncapas.repository.iUserRepository;
 import com.uca.parcialfinalncapas.service.TicketService;
 import com.uca.parcialfinalncapas.utils.enums.Rol;
 import com.uca.parcialfinalncapas.utils.mappers.TicketMapper;
@@ -29,15 +28,15 @@ import java.util.List;
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
-    private final UserRepository userRepository;
+    private final iUserRepository iUserRepository;
 
     @Override
     @Transactional
     public TicketResponse createTicket(TicketCreateRequest ticket) {
-        var usuarioSolicitante = userRepository.findByCorreo(ticket.getCorreoUsuario())
+        var usuarioSolicitante = iUserRepository.findByCorreo(ticket.getCorreoUsuario())
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con correo: " + ticket.getCorreoUsuario()));
 
-        var usuarioSoporte = userRepository.findByCorreo(ticket.getCorreoSoporte())
+        var usuarioSoporte = iUserRepository.findByCorreo(ticket.getCorreoSoporte())
                 .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado con correo: " + ticket.getCorreoSoporte()));
 
         if (!usuarioSoporte.getNombreRol().equals(Rol.TECH.getValue())) {
@@ -55,10 +54,10 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticketExistente = ticketRepository.findById(ticket.getId())
                 .orElseThrow(() -> new TicketNotFoundException("Ticket no encontrado con ID: " + ticket.getId()));
 
-        var usuarioSolicitante = userRepository.findById(ticketExistente.getUsuarioId())
+        var usuarioSolicitante = iUserRepository.findById(ticketExistente.getUsuarioId())
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-        var usuarioSoporte = userRepository.findByCorreo(ticket.getCorreoSoporte())
+        var usuarioSoporte = iUserRepository.findByCorreo(ticket.getCorreoSoporte())
                 .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado con correo: " + ticket.getCorreoSoporte()));
 
         if (!usuarioSoporte.getNombreRol().equals(Rol.TECH.getValue())) {
@@ -83,10 +82,10 @@ public class TicketServiceImpl implements TicketService {
     var ticketExistente = ticketRepository.findById(id)
             .orElseThrow(() -> new TicketNotFoundException("Ticket no encontrado con ID: " + id));
 
-    var usuarioSolicitante = userRepository.findById(ticketExistente.getUsuarioId())
+    var usuarioSolicitante = iUserRepository.findById(ticketExistente.getUsuarioId())
             .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
-    var usuarioSoporte = userRepository.findById(ticketExistente.getTecnicoAsignadoId())
+    var usuarioSoporte = iUserRepository.findById(ticketExistente.getTecnicoAsignadoId())
             .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado"));
 
         return TicketMapper.toDTO(ticketExistente, usuarioSolicitante.getCorreo(), usuarioSoporte.getCorreo());
