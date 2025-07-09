@@ -37,7 +37,7 @@ public class UserController {
         return ResponseBuilderUtil.buildResponse("Usuario encontrado", HttpStatus.OK, user);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<GeneralResponse> createUser(@Valid @RequestBody UserCreateRequest user) {
         UserResponse createdUser = userService.save(user);
         return ResponseBuilderUtil.buildResponse("Usuario creado correctamente", HttpStatus.CREATED, createdUser);
