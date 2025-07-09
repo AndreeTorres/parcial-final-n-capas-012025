@@ -3,6 +3,7 @@ package com.uca.parcialfinalncapas.exceptions;
 import com.uca.parcialfinalncapas.dto.response.ErrorResponse;
 import com.uca.parcialfinalncapas.utils.ResponseBuilderUtil;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,4 +42,13 @@ public class GlobalExceptionHandler {
                 .toList();
         return ResponseBuilderUtil.buildErrorResponse(e, HttpStatus.BAD_REQUEST, errors);
     }
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(JwtAuthenticationException exception, HttpServletRequest request) {
+        String message = exception.getMessage();
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        String errorDetail = "Path: " + path + ", Method: " + method;
+        return ResponseBuilderUtil.buildErrorResponse(exception, HttpStatus.UNAUTHORIZED, List.of(message, errorDetail));
+    }
+
 }
