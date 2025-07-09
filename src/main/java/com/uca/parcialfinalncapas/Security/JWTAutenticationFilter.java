@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-
 import java.io.IOException;
-
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class JWTAutenticationFilter extends OncePerRequestFilter {
@@ -29,6 +29,11 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
     @Qualifier("customUserDetailsService")
     private UserDetailsService userDetailsService;
 
+    private static final List<String> PUBLIC_PATHS = Arrays.asList(
+            "/api/auth/login",
+            "/api/users/create"
+    );
+
     private String getTokenFromRequest(HttpServletRequest request) {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
@@ -37,29 +42,34 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-
+    private boolean isPublicPath(String requestURI) {
+        return PUBLIC_PATHS.stream().anyMatch(path -> requestURI.equals(path));
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+        String requestURI = request.getRequestURI();
+
+        if (isPublicPath(requestURI)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             final String token = getTokenFromRequest(request);
 
-            // Si el token es nulo, lanzamos una excepción personalizada
             if (token == null) {
                 throw new JwtAuthenticationException("Token no proporcionado.");
             }
-
-            // Extraemos el email del token y validamos
             String email = jwtService.extractUsername(token);
 
             if (email == null || !jwtService.isTokenValid(token, userDetailsService.loadUserByUsername(email))) {
                 throw new JwtAuthenticationException("Token inválido o expirado.");
             }
 
-            // Cargamos los detalles del usuario y configuramos la autenticación
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
@@ -68,7 +78,6 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
                             userDetails.getAuthorities()
                     );
 
-            // Establecemos los detalles de autenticación y el contexto de seguridad
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
@@ -79,11 +88,11 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
             response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"" + e.getMessage() + "\"}");
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-        }catch (Exception e) {
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"" + e.getMessage() + "\", \"message\": \"Token invalido\"}");
             response.getWriter().write("{\"error\": \"" + e.getMessage() + "\", \"message\": \"Error inesperado\"}");
-
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
         }
     }
 }

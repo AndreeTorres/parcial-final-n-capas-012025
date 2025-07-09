@@ -13,8 +13,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 import com.uca.parcialfinalncapas.Security.JWTAutenticationFilter;
 
-
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -32,8 +30,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authRequests ->
                         authRequests
-                                .requestMatchers("/api/auth/login","/api/users/create").permitAll()
-                                .requestMatchers("/api" + "/**").authenticated()
+                                .requestMatchers("/api/auth/login", "/api/users/create").permitAll()
+                                .requestMatchers("/api/**").authenticated()
                                 .anyRequest().denyAll()
                 )
                 .sessionManagement(sessionManager ->
@@ -43,5 +41,4 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
 }
