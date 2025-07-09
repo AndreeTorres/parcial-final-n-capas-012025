@@ -25,13 +25,6 @@ Ejecutá el siguiente comando para construir la imagen y levantar los servicios:
 ```bash
 docker-compose up --build
 ```
-
-Esto hará lo siguiente:
-
-- Compilar la imagen de la app con el `Dockerfile`
-- Levantar PostgreSQL con los datos definidos
-- Exponer la app en `http://localhost:8080`
-
 ---
 
 ##  Configuración de base de datos
@@ -43,7 +36,4 @@ SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/supportdb
 SPRING_DATASOURCE_USERNAME=postgres
 SPRING_DATASOURCE_PASSWORD=admin1234
 ```
-
-El archivo `application.yml` está configurado para leer estas variables de entorno.
-
 ---
