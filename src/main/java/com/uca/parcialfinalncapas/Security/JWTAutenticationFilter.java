@@ -37,6 +37,12 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
             "/api/users/create"
     );
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestURI = request.getRequestURI();
+        return isPublicPath(requestURI);
+    }
+
     private String getTokenFromRequest(HttpServletRequest request) {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
@@ -53,13 +59,6 @@ public class JWTAutenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        String requestURI = request.getRequestURI();
-
-        if (isPublicPath(requestURI)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         try {
             final String token = getTokenFromRequest(request);

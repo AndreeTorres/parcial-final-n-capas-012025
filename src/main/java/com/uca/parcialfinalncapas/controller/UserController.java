@@ -40,7 +40,6 @@ public class UserController {
         return ResponseBuilderUtil.buildResponse("Usuario encontrado", HttpStatus.OK, user);
     }
 
-    @PreAuthorize("hasRole('TECH')")
     @PostMapping("/create")
     public ResponseEntity<GeneralResponse> createUser(@Valid @RequestBody UserCreateRequest user) {
         UserResponse createdUser = userService.save(user);
